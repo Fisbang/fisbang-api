@@ -18,6 +18,8 @@ library
   exposed-modules:     Api
                      , Api.User
                      , Api.Appliance
+                     , Api.Device
+                     , Api.Environment
                      , Config
                      , Models
   build-depends:       base

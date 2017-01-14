@@ -20,10 +20,10 @@ var getUsers = function(onSuccess, onError)
   xhr.send(null);
 }
 
-var getUsersByName = function(name, onSuccess, onError)
+var getUsersByUserId = function(userId, onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/users/' + encodeURIComponent(name) + '', true);
+  xhr.open('GET', '/users/' + encodeURIComponent(userId) + '', true);
   xhr.setRequestHeader("Accept","application/json");
   xhr.onreadystatechange = function (e) {
     if (xhr.readyState == 4) {
@@ -85,10 +85,10 @@ var getAppliances = function(onSuccess, onError)
   xhr.send(null);
 }
 
-var getAppliancesByName = function(name, onSuccess, onError)
+var getAppliancesByApplianceId = function(applianceId, onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/appliances/' + encodeURIComponent(name) + '', true);
+  xhr.open('GET', '/appliances/' + encodeURIComponent(applianceId) + '', true);
   xhr.setRequestHeader("Accept","application/json");
   xhr.onreadystatechange = function (e) {
     if (xhr.readyState == 4) {
@@ -110,6 +110,136 @@ var postAppliances = function(body, onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();
   xhr.open('POST', '/appliances', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.setRequestHeader("Content-Type","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(JSON.stringify(body)
+);
+}
+
+var getDevices = function(onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/devices', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(null);
+}
+
+var getDevicesByToken = function(token, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/devices/' + encodeURIComponent(token) + '', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(null);
+}
+
+var postDevices = function(body, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/devices', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.setRequestHeader("Content-Type","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(JSON.stringify(body)
+);
+}
+
+var getEnvironments = function(onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/environments', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(null);
+}
+
+var getEnvironmentsByEnvironmentId = function(environmentId, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/environments/' + encodeURIComponent(environmentId) + '', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(null);
+}
+
+var postEnvironments = function(body, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/environments', true);
   xhr.setRequestHeader("Accept","application/json");
   xhr.setRequestHeader("Content-Type","application/json");
   xhr.onreadystatechange = function (e) {

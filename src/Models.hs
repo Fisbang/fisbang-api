@@ -20,7 +20,7 @@ import           Database.Persist.TH  (mkMigrate, mkPersist, persistLowerCase,
                                        share, sqlSettings)
 import           GHC.Generics         (Generic)
 
-import           Config
+import           Config               (Config (..))
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
@@ -28,6 +28,15 @@ User json
     email String
     deriving Show
 Appliance json
+    userId UserId
+    name String
+    deriving Show
+Device json
+    userId UserId
+    token String
+    deriving Show
+Environment json
+    userId UserId
     name String
     deriving Show
 |]

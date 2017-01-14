@@ -22,10 +22,12 @@ import           Models
 
 import           Api.User
 import           Api.Appliance
+import           Api.Device
+import           Api.Environment
 
-type FisbangAPI =  UserAPI :<|> ApplianceAPI
+type FisbangAPI =  UserAPI :<|> ApplianceAPI :<|> DeviceAPI :<|> EnvironmentAPI
 
-fisbangAPIServer = userServer :<|> applianceServer
+fisbangAPIServer = userServer :<|> applianceServer :<|> deviceServer :<|> environmentServer
 
 -- | This is the function we export to run our 'FisbangAPI'. Given
 -- a 'Config', we return a WAI 'Application' which any WAI compliant server
