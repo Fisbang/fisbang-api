@@ -21,18 +21,22 @@ import           Config                      (App (..), Config (..))
 import           Models
 
 import           Api.User
+import           Api.Appliance
 
- 
--- | This is the function we export to run our 'UserAPI'. Given
+type FisbangAPI =  UserAPI :<|> ApplianceAPI
+
+fisbangAPIServer = userServer :<|> applianceServer
+
+-- | This is the function we export to run our 'FisbangAPI'. Given
 -- a 'Config', we return a WAI 'Application' which any WAI compliant server
 -- can run.
-userApp :: Config -> Application
-userApp cfg = serve (Proxy :: Proxy UserAPI) (appToServer cfg)
+fisbangApi :: Config -> Application
+fisbangApi cfg = serve (Proxy :: Proxy FisbangAPI) (appToServer cfg)
 
 -- | This functions tells Servant how to run the 'App' monad with our
 -- 'server' function.
-appToServer :: Config -> Server UserAPI
-appToServer cfg = enter (convertApp cfg) userServer
+appToServer :: Config -> Server FisbangAPI
+appToServer cfg = enter (convertApp cfg) fisbangAPIServer
 
 -- | This function converts our 'App' monad into the @ExceptT ServantErr
 -- IO@ monad that Servant's 'enter' function needs in order to run the
@@ -53,18 +57,18 @@ files = serveDirectory "assets"
 -- two different APIs and applications. This is a powerful tool for code
 -- reuse and abstraction! We need to put the 'Raw' endpoint last, since it
 -- always succeeds.
-type AppAPI = UserAPI :<|> Raw
+type FisbangAPP = FisbangAPI :<|> Raw
 
-appApi :: Proxy AppAPI
-appApi = Proxy
+fisbangApp :: Proxy FisbangAPP
+fisbangApp = Proxy
 
--- | Finally, this function takes a configuration and runs our 'UserAPI'
+-- | Finally, this function takes a configuration and runs our 'FisbangApp'
 -- alongside the 'Raw' endpoint that serves all of our files.
 app :: Config -> Application
 app cfg =
-    serve appApi (appToServer cfg :<|> files)
+    serve fisbangApp (appToServer cfg :<|> files)
 
 -- | Generates JavaScript to query the API.
 generateJavaScript :: IO ()
 generateJavaScript =
-    writeJSForAPI (Proxy :: Proxy UserAPI) vanillaJS "./assets/api.js"
+    writeJSForAPI (Proxy :: Proxy FisbangAPI) vanillaJS "./assets/api.js"

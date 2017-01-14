@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Api
                      , Api.User
+                     , Api.Appliance
                      , Config
                      , Models
   build-depends:       base
