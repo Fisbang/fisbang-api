@@ -42,6 +42,14 @@ Appliance json
     environmentId EnvironmentId
     name String
     deriving Show
+DeviceEnvironment json
+    deviceId DeviceId
+    environmentId EnvironmentId
+    deriving Show
+DeviceAppliance json
+    deviceId DeviceId
+    applianceId ApplianceId
+    deriving Show
 |]
 
 doMigrations :: SqlPersistT IO ()

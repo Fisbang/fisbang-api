@@ -8,8 +8,8 @@ import           Control.Monad.Except
 import           Control.Monad.Reader        (ReaderT, runReaderT)
 import           Control.Monad.Reader.Class
 import           Data.Int                    (Int64)
-import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get, delete,
-                                              selectFirst, selectList, (==.))
+import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get, delete, update,
+                                              selectFirst, selectList, (==.), (=.))
 import           Network.Wai                 (Application)
 import           Servant
 import           Servant.JS                  (vanillaJS, writeJSForAPI)
@@ -19,13 +19,14 @@ import           Models
 
 type ApplianceAPI =
          "appliances" :> Get '[JSON] [Entity Appliance]
+    :<|> "appliances" :> ReqBody '[JSON] Appliance :> Post '[JSON] Int64
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> Get '[JSON] (Appliance)
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> Delete '[JSON] (String)
-    :<|> "appliances" :> ReqBody '[JSON] Appliance :> Post '[JSON] Int64
+    :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> ReqBody '[JSON] Appliance :> Put '[JSON] (Appliance)
 
 -- | The server that runs the ApplianceAPI
 applianceServer :: ServerT ApplianceAPI App
-applianceServer = allAppliances :<|> singleAppliance :<|> deleteAppliance :<|> createAppliance
+applianceServer = allAppliances :<|> createAppliance :<|> singleAppliance :<|> deleteAppliance :<|> updateAppliance 
 
 -- | Returns all appliances in the database.
 allAppliances :: App [Entity Appliance]
@@ -60,3 +61,13 @@ createAppliance p = do
         newAppliance <- runDb (insert (Appliance (entityKey user) (applianceEnvironmentId p) (applianceName p)))
         return $ fromSqlKey newAppliance
 
+-- | Returns an appliance by name or throws a 404 error.
+updateAppliance :: Key Appliance -> Appliance -> App (Appliance)
+updateAppliance applianceId newAppliance = do
+    maybeAppliance <- runDb (get applianceId)
+    case maybeAppliance of
+         Nothing ->
+            throwError err404
+         Just appliance -> do
+            runDb (update applianceId [ApplianceEnvironmentId =. (applianceEnvironmentId newAppliance), ApplianceName =. (applianceName newAppliance)])
+            return newAppliance

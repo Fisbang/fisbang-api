@@ -8,8 +8,8 @@ import           Control.Monad.Except
 import           Control.Monad.Reader        (ReaderT, runReaderT)
 import           Control.Monad.Reader.Class
 import           Data.Int                    (Int64)
-import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get, delete,
-                                              selectFirst, selectList, (==.))
+import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get, delete, update,
+                                              selectFirst, selectList, (==.), (=.))
 import           Network.Wai                 (Application)
 import           Servant
 
@@ -18,14 +18,15 @@ import           Models
 
 type EnvironmentAPI =
          "environments" :> Get '[JSON] [Entity Environment]
+    :<|> "environments" :> ReqBody '[JSON] Environment :> Post '[JSON] Int64
     :<|> "environments" :> Capture "environmentId" (Key Environment) :> Get '[JSON] (Environment)
     :<|> "environments" :> Capture "environmentId" (Key Environment) :> Delete '[JSON] (String)
-    :<|> "environments" :> ReqBody '[JSON] Environment :> Post '[JSON] Int64
+    :<|> "environments" :> Capture "environmentId" (Key Environment) :> ReqBody '[JSON] Environment :> Put '[JSON] (Environment)
     :<|> "environments" :> Capture "environtmentId" (Key Environment) :> "appliances" :> Get '[JSON] [Entity Appliance]
 
 -- | The server that runs the EnvironmentAPI
 environmentServer :: ServerT EnvironmentAPI App
-environmentServer = allEnvironments :<|> singleEnvironment :<|> deleteEnvironment :<|> createEnvironment :<|> singleEnvironmentAppliances
+environmentServer = allEnvironments :<|> createEnvironment :<|> singleEnvironment :<|> deleteEnvironment :<|> updateEnvironment :<|> singleEnvironmentAppliances
 
 -- | Returns all environments in the database.
 allEnvironments :: App [Entity Environment]
@@ -46,6 +47,17 @@ singleEnvironment environmentId = do
             throwError err404
          Just environment ->
             return environment
+
+-- | Returns an environment by name or throws a 404 error.
+updateEnvironment :: Key Environment -> Environment -> App (Environment)
+updateEnvironment environmentId newEnvironment = do
+    maybeEnvironment <- runDb (get environmentId)
+    case maybeEnvironment of
+         Nothing ->
+            throwError err404
+         Just environment -> do
+            runDb (update environmentId [EnvironmentParentId =. (environmentParentId newEnvironment), EnvironmentName =. (environmentName newEnvironment)])
+            return newEnvironment
 
 -- | Returns an appliance by name or throws a 404 error.
 deleteEnvironment :: Key Environment -> App (String)

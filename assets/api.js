@@ -85,6 +85,29 @@ var getAppliances = function(onSuccess, onError)
   xhr.send(null);
 }
 
+var postAppliances = function(body, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/appliances', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.setRequestHeader("Content-Type","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(JSON.stringify(body)
+);
+}
+
 var getAppliancesByApplianceId = function(applianceId, onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();
@@ -127,10 +150,10 @@ var deleteAppliancesByApplianceId = function(applianceId, onSuccess, onError)
   xhr.send(null);
 }
 
-var postAppliances = function(body, onSuccess, onError)
+var putAppliancesByApplianceId = function(applianceId, body, onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', '/appliances', true);
+  xhr.open('PUT', '/appliances/' + encodeURIComponent(applianceId) + '', true);
   xhr.setRequestHeader("Accept","application/json");
   xhr.setRequestHeader("Content-Type","application/json");
   xhr.onreadystatechange = function (e) {
@@ -236,6 +259,29 @@ var getEnvironments = function(onSuccess, onError)
   xhr.send(null);
 }
 
+var postEnvironments = function(body, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/environments', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.setRequestHeader("Content-Type","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(JSON.stringify(body)
+);
+}
+
 var getEnvironmentsByEnvironmentId = function(environmentId, onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();
@@ -278,10 +324,10 @@ var deleteEnvironmentsByEnvironmentId = function(environmentId, onSuccess, onErr
   xhr.send(null);
 }
 
-var postEnvironments = function(body, onSuccess, onError)
+var putEnvironmentsByEnvironmentId = function(environmentId, body, onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', '/environments', true);
+  xhr.open('PUT', '/environments/' + encodeURIComponent(environmentId) + '', true);
   xhr.setRequestHeader("Accept","application/json");
   xhr.setRequestHeader("Content-Type","application/json");
   xhr.onreadystatechange = function (e) {
