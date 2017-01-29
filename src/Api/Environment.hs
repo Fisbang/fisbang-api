@@ -8,7 +8,7 @@ import           Control.Monad.Except
 import           Control.Monad.Reader        (ReaderT, runReaderT)
 import           Control.Monad.Reader.Class
 import           Data.Int                    (Int64)
-import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get,
+import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get, delete,
                                               selectFirst, selectList, (==.))
 import           Network.Wai                 (Application)
 import           Servant
@@ -19,11 +19,12 @@ import           Models
 type EnvironmentAPI =
          "environments" :> Get '[JSON] [Entity Environment]
     :<|> "environments" :> Capture "environmentId" (Key Environment) :> Get '[JSON] (Environment)
+    :<|> "environments" :> Capture "environmentId" (Key Environment) :> Delete '[JSON] (String)
     :<|> "environments" :> ReqBody '[JSON] Environment :> Post '[JSON] Int64
 
 -- | The server that runs the EnvironmentAPI
 environmentServer :: ServerT EnvironmentAPI App
-environmentServer = allEnvironments :<|> singleEnvironment :<|> createEnvironment
+environmentServer = allEnvironments :<|> singleEnvironment :<|> deleteEnvironment :<|> createEnvironment
 
 -- | Returns all environments in the database.
 allEnvironments :: App [Entity Environment]
@@ -45,6 +46,12 @@ singleEnvironment environmentId = do
          Just environment ->
             return environment
 
+-- | Returns an appliance by name or throws a 404 error.
+deleteEnvironment :: Key Environment -> App (String)
+deleteEnvironment environmentId = do
+    runDb (delete environmentId)
+    return "OK"
+
 -- | Creates an environment in the database.
 createEnvironment :: Environment -> App Int64
 createEnvironment p = do
@@ -53,6 +60,6 @@ createEnvironment p = do
       Nothing ->
         throwError err401
       Just user -> do
-        newEnvironment <- runDb (insert (Environment (entityKey user) (environmentName p)))
+        newEnvironment <- runDb (insert (Environment (entityKey user) (environmentParentId p) (environmentName p)))
         return $ fromSqlKey newEnvironment
 

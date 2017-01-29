@@ -8,7 +8,7 @@ import           Control.Monad.Except
 import           Control.Monad.Reader        (ReaderT, runReaderT)
 import           Control.Monad.Reader.Class
 import           Data.Int                    (Int64)
-import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get,
+import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get, delete,
                                               selectFirst, selectList, (==.))
 import           Network.Wai                 (Application)
 import           Servant
@@ -20,11 +20,12 @@ import           Models
 type ApplianceAPI =
          "appliances" :> Get '[JSON] [Entity Appliance]
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> Get '[JSON] (Appliance)
+    :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> Delete '[JSON] (String)
     :<|> "appliances" :> ReqBody '[JSON] Appliance :> Post '[JSON] Int64
 
 -- | The server that runs the ApplianceAPI
 applianceServer :: ServerT ApplianceAPI App
-applianceServer = allAppliances :<|> singleAppliance :<|> createAppliance
+applianceServer = allAppliances :<|> singleAppliance :<|> deleteAppliance :<|> createAppliance
 
 -- | Returns all appliances in the database.
 allAppliances :: App [Entity Appliance]
@@ -40,6 +41,13 @@ singleAppliance applianceId = do
             throwError err404
          Just appliance ->
             return appliance
+
+-- | Returns an appliance by name or throws a 404 error.
+deleteAppliance :: Key Appliance -> App (String)
+deleteAppliance applianceId = do
+    runDb (delete applianceId)
+    return "OK"
+
 
 -- | Creates an appliance in the database.
 createAppliance :: Appliance -> App Int64
