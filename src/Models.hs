@@ -28,10 +28,6 @@ User json
     name String
     email String
     deriving Show
-Appliance json
-    userId UserId
-    name String
-    deriving Show
 Device json
     userId UserId
     token String
@@ -39,6 +35,11 @@ Device json
 Environment json
     userId UserId
     parentId EnvironmentId Maybe
+    name String
+    deriving Show
+Appliance json
+    userId UserId
+    environmentId EnvironmentId
     name String
     deriving Show
 |]

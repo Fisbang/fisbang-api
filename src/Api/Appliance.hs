@@ -57,6 +57,6 @@ createAppliance p = do
       Nothing ->
         throwError err401
       Just user -> do
-        newAppliance <- runDb (insert (Appliance (entityKey user) (applianceName p)))
+        newAppliance <- runDb (insert (Appliance (entityKey user) (applianceEnvironmentId p) (applianceName p)))
         return $ fromSqlKey newAppliance
 

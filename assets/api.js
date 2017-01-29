@@ -300,3 +300,24 @@ var postEnvironments = function(body, onSuccess, onError)
   xhr.send(JSON.stringify(body)
 );
 }
+
+var getEnvironmentsByEnvirontmentIdAppliances = function(environtmentId, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/environments/' + encodeURIComponent(environtmentId) + '/appliances', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(null);
+}
