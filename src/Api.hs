@@ -14,6 +14,7 @@ import           Data.Int                    (Int64)
 import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert,
                                               selectFirst, selectList, (==.))
 import           Network.Wai                 (Application)
+import           Network.Wai.Middleware.Cors (simpleCors)
 import           Servant
 import           Servant.JS                  (vanillaJS, writeJSForAPI)
 
@@ -68,7 +69,7 @@ fisbangApp = Proxy
 -- alongside the 'Raw' endpoint that serves all of our files.
 app :: Config -> Application
 app cfg =
-    serve fisbangApp (appToServer cfg :<|> files)
+    simpleCors (serve fisbangApp (appToServer cfg :<|> files))
 
 -- | Generates JavaScript to query the API.
 generateJavaScript :: IO ()
