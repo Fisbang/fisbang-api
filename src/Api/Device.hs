@@ -48,6 +48,6 @@ createDevice p = do
       Nothing ->
         throwError err401
       Just user -> do
-        newDevice <- runDb (insert (Device (entityKey user) (deviceToken p)))
+        newDevice <- runDb (insert (Device (entityKey user) (deviceToken p) (Nothing) (Nothing)))
         return $ fromSqlKey newDevice
 

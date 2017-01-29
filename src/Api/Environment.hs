@@ -23,10 +23,11 @@ type EnvironmentAPI =
     :<|> "environments" :> Capture "environmentId" (Key Environment) :> Delete '[JSON] (String)
     :<|> "environments" :> Capture "environmentId" (Key Environment) :> ReqBody '[JSON] Environment :> Put '[JSON] (Environment)
     :<|> "environments" :> Capture "environtmentId" (Key Environment) :> "appliances" :> Get '[JSON] [Entity Appliance]
+    :<|> "environments" :> Capture "environtmentId" (Key Environment) :> "devices" :> Get '[JSON] [Entity Device]
 
 -- | The server that runs the EnvironmentAPI
 environmentServer :: ServerT EnvironmentAPI App
-environmentServer = allEnvironments :<|> createEnvironment :<|> singleEnvironment :<|> deleteEnvironment :<|> updateEnvironment :<|> singleEnvironmentAppliances
+environmentServer = allEnvironments :<|> createEnvironment :<|> singleEnvironment :<|> deleteEnvironment :<|> updateEnvironment :<|> singleEnvironmentAppliances :<|> getEnvironmentDevice
 
 -- | Returns all environments in the database.
 allEnvironments :: App [Entity Environment]
@@ -85,3 +86,12 @@ singleEnvironmentAppliances environmentId = do
             throwError err404
          Just environment ->
             runDb (selectList [ApplianceEnvironmentId ==. (environmentId) ] [])
+
+getEnvironmentDevice :: Key Environment -> App [Entity Device]
+getEnvironmentDevice environmentId = do
+    maybeEnvironment <- runDb (get environmentId)
+    case maybeEnvironment of
+         Nothing ->
+            throwError err404
+         Just appliance -> do
+           runDb (selectList [DeviceEnvironmentId ==. (Just environmentId)] [])

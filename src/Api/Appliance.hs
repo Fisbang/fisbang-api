@@ -23,10 +23,11 @@ type ApplianceAPI =
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> Get '[JSON] (Appliance)
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> Delete '[JSON] (String)
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> ReqBody '[JSON] Appliance :> Put '[JSON] (Appliance)
+    :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> "devices" :> Get '[JSON] [Entity Device]
 
 -- | The server that runs the ApplianceAPI
 applianceServer :: ServerT ApplianceAPI App
-applianceServer = allAppliances :<|> createAppliance :<|> singleAppliance :<|> deleteAppliance :<|> updateAppliance 
+applianceServer = allAppliances :<|> createAppliance :<|> singleAppliance :<|> deleteAppliance :<|> updateAppliance :<|> getApplianceDevice
 
 -- | Returns all appliances in the database.
 allAppliances :: App [Entity Appliance]
@@ -71,3 +72,16 @@ updateAppliance applianceId newAppliance = do
          Just appliance -> do
             runDb (update applianceId [ApplianceEnvironmentId =. (applianceEnvironmentId newAppliance), ApplianceName =. (applianceName newAppliance)])
             return newAppliance
+
+getApplianceDevice :: Key Appliance -> App [Entity Device]
+getApplianceDevice applianceId = do
+    maybeAppliance <- runDb (get applianceId)
+    case maybeAppliance of
+         Nothing ->
+            throwError err404
+         Just appliance -> do
+           runDb (selectList [DeviceApplianceId ==. (Just applianceId)] [])
+
+             
+            
+  
