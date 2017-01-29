@@ -18,9 +18,10 @@ import           Data.Aeson           (FromJSON, ToJSON)
 import           Database.Persist.Sql
 import           Database.Persist.TH  (mkMigrate, mkPersist, persistLowerCase,
                                        share, sqlSettings)
+
 import           GHC.Generics         (Generic)
 
-import           Config               (Config (..))
+import           Config               (App (..), Config (..))
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
 User json
@@ -37,6 +38,7 @@ Device json
     deriving Show
 Environment json
     userId UserId
+    parentId EnvironmentId Maybe
     name String
     deriving Show
 |]
@@ -48,3 +50,5 @@ runDb :: (MonadReader Config m, MonadIO m) => SqlPersistT IO b -> m b
 runDb query = do
     pool <- asks getPool
     liftIO $ runSqlPool query pool
+
+           
