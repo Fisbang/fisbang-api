@@ -21,10 +21,11 @@ type EnvironmentAPI =
     :<|> "environments" :> Capture "environmentId" (Key Environment) :> Get '[JSON] (Environment)
     :<|> "environments" :> Capture "environmentId" (Key Environment) :> Delete '[JSON] (String)
     :<|> "environments" :> ReqBody '[JSON] Environment :> Post '[JSON] Int64
+    :<|> "environments" :> Capture "environtmentId" (Key Environment) :> "appliances" :> Get '[JSON] [Entity Appliance]
 
 -- | The server that runs the EnvironmentAPI
 environmentServer :: ServerT EnvironmentAPI App
-environmentServer = allEnvironments :<|> singleEnvironment :<|> deleteEnvironment :<|> createEnvironment
+environmentServer = allEnvironments :<|> singleEnvironment :<|> deleteEnvironment :<|> createEnvironment :<|> singleEnvironmentAppliances
 
 -- | Returns all environments in the database.
 allEnvironments :: App [Entity Environment]
@@ -63,3 +64,12 @@ createEnvironment p = do
         newEnvironment <- runDb (insert (Environment (entityKey user) (environmentParentId p) (environmentName p)))
         return $ fromSqlKey newEnvironment
 
+-- | Returns an environment by name or throws a 404 error.
+singleEnvironmentAppliances :: Key Environment -> App [Entity Appliance]
+singleEnvironmentAppliances environmentId = do
+    maybeEnvironment <- runDb (get environmentId)
+    case maybeEnvironment of
+         Nothing ->
+            throwError err404
+         Just environment ->
+            runDb (selectList [ApplianceEnvironmentId ==. (environmentId) ] [])
