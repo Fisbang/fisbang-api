@@ -194,6 +194,50 @@ var getAppliancesByApplianceIdDevices = function(applianceId, onSuccess, onError
   xhr.send(null);
 }
 
+var postAppliancesByApplianceIdDevices = function(applianceId, body, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/appliances/' + encodeURIComponent(applianceId) + '/devices', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.setRequestHeader("Content-Type","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(JSON.stringify(body)
+);
+}
+
+var deleteAppliancesByApplianceIdDevicesByDeviceId = function(applianceId, deviceId, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('DELETE', '/appliances/' + encodeURIComponent(applianceId) + '/devices/' + encodeURIComponent(deviceId) + '', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(null);
+}
+
 var getDevices = function(onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();

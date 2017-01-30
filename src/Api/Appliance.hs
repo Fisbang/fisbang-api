@@ -24,10 +24,12 @@ type ApplianceAPI =
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> Delete '[JSON] (String)
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> ReqBody '[JSON] Appliance :> Put '[JSON] (Appliance)
     :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> "devices" :> Get '[JSON] [Entity Device]
+    :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> "devices" :> ReqBody '[JSON] (Entity Device) :> Post '[JSON] [Entity Device]
+    :<|> "appliances" :> Capture "applianceId" (Key Appliance) :> "devices" :> Capture "deviceId" (Key Device) :> Delete '[JSON] [Entity Device]
 
 -- | The server that runs the ApplianceAPI
 applianceServer :: ServerT ApplianceAPI App
-applianceServer = allAppliances :<|> createAppliance :<|> singleAppliance :<|> deleteAppliance :<|> updateAppliance :<|> getApplianceDevice
+applianceServer = allAppliances :<|> createAppliance :<|> singleAppliance :<|> deleteAppliance :<|> updateAppliance :<|> getApplianceDevice :<|> postApplianceDevice :<|> deleteApplianceDevice
 
 -- | Returns all appliances in the database.
 allAppliances :: App [Entity Appliance]
@@ -82,6 +84,36 @@ getApplianceDevice applianceId = do
          Just appliance -> do
            runDb (selectList [DeviceApplianceId ==. (Just applianceId)] [])
 
+postApplianceDevice :: Key Appliance -> Entity Device -> App [Entity Device]
+postApplianceDevice applianceId device = do
+  maybeAppliance <- runDb (get applianceId)
+  case maybeAppliance of
+    Nothing ->
+      throwError err404
+    Just appliance -> do
+      maybeDevice <- runDb (get (entityKey device))
+      case maybeDevice of
+        Nothing ->
+          throwError err404
+        Just _ -> do
+          runDb (update (entityKey device) [DeviceApplianceId =. (Just applianceId), DeviceEnvironmentId =. Nothing])
+          runDb (selectList [DeviceApplianceId ==. (Just applianceId)] [])
+
+deleteApplianceDevice :: Key Appliance -> Key Device -> App [Entity Device]
+deleteApplianceDevice applianceId deviceId = do
+  maybeAppliance <- runDb (get applianceId)
+  case maybeAppliance of
+    Nothing ->
+      throwError err404
+    Just appliance -> do
+      maybeDevice <- runDb (selectFirst [DeviceId ==. deviceId, DeviceApplianceId ==. (Just applianceId)] [])
+      case maybeDevice of
+        Nothing ->
+          throwError err404
+        Just device -> do
+          runDb (update (deviceId) [DeviceApplianceId =. Nothing])
+          runDb (selectList [DeviceApplianceId ==. (Just applianceId)] [])
+          
              
             
   
