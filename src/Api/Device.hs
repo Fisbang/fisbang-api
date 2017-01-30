@@ -8,7 +8,7 @@ import           Control.Monad.Except
 import           Control.Monad.Reader        (ReaderT, runReaderT)
 import           Control.Monad.Reader.Class
 import           Data.Int                    (Int64)
-import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert,
+import           Database.Persist.Postgresql (Entity (..), fromSqlKey, insert, get,
                                               selectFirst, selectList, (==.))
 import           Network.Wai                 (Application)
 import           Servant
@@ -18,7 +18,7 @@ import           Models
 
 type DeviceAPI =
          "devices" :> Get '[JSON] [Entity Device]
-    :<|> "devices" :> Capture "token" String :> Get '[JSON] (Entity Device)
+    :<|> "devices" :> Capture "deviceId" (Key Device) :> Get '[JSON] (Device)
     :<|> "devices" :> ReqBody '[JSON] Device :> Post '[JSON] Int64
 
 -- | The server that runs the DeviceAPI
@@ -30,10 +30,10 @@ allDevices :: App [Entity Device]
 allDevices =
     runDb (selectList [] [])
 
--- | Returns an device by token or throws a 404 error.
-singleDevice :: String -> App (Entity Device)
-singleDevice str = do
-    maybeDevice <- runDb (selectFirst [DeviceToken ==. str] [])
+-- | Returns an device by Id or throws a 404 error.
+singleDevice :: Key Device -> App (Device)
+singleDevice deviceId = do
+    maybeDevice <- runDb (get deviceId)
     case maybeDevice of
          Nothing ->
             throwError err404
