@@ -24,10 +24,12 @@ type EnvironmentAPI =
     :<|> "environments" :> Capture "environmentId" (Key Environment) :> ReqBody '[JSON] Environment :> Put '[JSON] (Environment)
     :<|> "environments" :> Capture "environtmentId" (Key Environment) :> "appliances" :> Get '[JSON] [Entity Appliance]
     :<|> "environments" :> Capture "environtmentId" (Key Environment) :> "devices" :> Get '[JSON] [Entity Device]
+    :<|> "environments" :> Capture "environtmentId" (Key Environment) :> "devices" :> ReqBody '[JSON] (Entity Device) :> Post '[JSON] [Entity Device]
+    :<|> "environments" :> Capture "environtmentId" (Key Environment) :> "devices" :> Capture "deviceId" (Key Device) :> Delete '[JSON] [Entity Device]
 
 -- | The server that runs the EnvironmentAPI
 environmentServer :: ServerT EnvironmentAPI App
-environmentServer = allEnvironments :<|> createEnvironment :<|> singleEnvironment :<|> deleteEnvironment :<|> updateEnvironment :<|> singleEnvironmentAppliances :<|> getEnvironmentDevice
+environmentServer = allEnvironments :<|> createEnvironment :<|> singleEnvironment :<|> deleteEnvironment :<|> updateEnvironment :<|> singleEnvironmentAppliances :<|> getEnvironmentDevice :<|> postEnvironmentDevice :<|> deleteEnvironmentDevice
 
 -- | Returns all environments in the database.
 allEnvironments :: App [Entity Environment]
@@ -95,3 +97,34 @@ getEnvironmentDevice environmentId = do
             throwError err404
          Just appliance -> do
            runDb (selectList [DeviceEnvironmentId ==. (Just environmentId)] [])
+
+postEnvironmentDevice :: Key Environment -> Entity Device -> App [Entity Device]
+postEnvironmentDevice environmentId device = do
+  maybeEnvironment <- runDb (get environmentId)
+  case maybeEnvironment of
+    Nothing ->
+      throwError err404
+    Just environment -> do
+      maybeDevice <- runDb (get (entityKey device))
+      case maybeDevice of
+        Nothing ->
+          throwError err404
+        Just _ -> do
+          runDb (update (entityKey device) [DeviceEnvironmentId =. (Just environmentId), DeviceApplianceId =. Nothing])
+          runDb (selectList [DeviceEnvironmentId ==. (Just environmentId)] [])
+
+deleteEnvironmentDevice :: Key Environment -> Key Device -> App [Entity Device]
+deleteEnvironmentDevice environmentId deviceId = do
+  maybeEnvironment <- runDb (get environmentId)
+  case maybeEnvironment of
+    Nothing ->
+      throwError err404
+    Just environment -> do
+      maybeDevice <- runDb (selectFirst [DeviceId ==. deviceId, DeviceEnvironmentId ==. (Just environmentId)] [])
+      case maybeDevice of
+        Nothing ->
+          throwError err404
+        Just device -> do
+          runDb (update (deviceId) [DeviceEnvironmentId =. Nothing])
+          runDb (selectList [DeviceEnvironmentId ==. (Just environmentId)] [])
+          

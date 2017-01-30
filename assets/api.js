@@ -215,10 +215,10 @@ var getDevices = function(onSuccess, onError)
   xhr.send(null);
 }
 
-var getDevicesByToken = function(token, onSuccess, onError)
+var getDevicesByDeviceId = function(deviceId, onSuccess, onError)
 {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/devices/' + encodeURIComponent(token) + '', true);
+  xhr.open('GET', '/devices/' + encodeURIComponent(deviceId) + '', true);
   xhr.setRequestHeader("Accept","application/json");
   xhr.onreadystatechange = function (e) {
     if (xhr.readyState == 4) {
@@ -393,6 +393,50 @@ var getEnvironmentsByEnvirontmentIdDevices = function(environtmentId, onSuccess,
 {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', '/environments/' + encodeURIComponent(environtmentId) + '/devices', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(null);
+}
+
+var postEnvironmentsByEnvirontmentIdDevices = function(environtmentId, body, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/environments/' + encodeURIComponent(environtmentId) + '/devices', true);
+  xhr.setRequestHeader("Accept","application/json");
+  xhr.setRequestHeader("Content-Type","application/json");
+  xhr.onreadystatechange = function (e) {
+    if (xhr.readyState == 4) {
+      if (xhr.status == 204 || xhr.status == 205) {
+        onSuccess();
+      } else if (xhr.status >= 200 && xhr.status < 300) {
+        var value = JSON.parse(xhr.responseText);
+        onSuccess(value);
+      } else {
+        var value = JSON.parse(xhr.responseText);
+        onError(value);
+      }
+    }
+  }
+  xhr.send(JSON.stringify(body)
+);
+}
+
+var deleteEnvironmentsByEnvirontmentIdDevicesByDeviceId = function(environtmentId, deviceId, onSuccess, onError)
+{
+  var xhr = new XMLHttpRequest();
+  xhr.open('DELETE', '/environments/' + encodeURIComponent(environtmentId) + '/devices/' + encodeURIComponent(deviceId) + '', true);
   xhr.setRequestHeader("Accept","application/json");
   xhr.onreadystatechange = function (e) {
     if (xhr.readyState == 4) {
